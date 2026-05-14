@@ -1,0 +1,900 @@
+basePath: /api/v1
+definitions:
+  handlers.CreateOrganisationInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handlers.CreatePolicyInput:
+    properties:
+      allowed_licenses:
+        type: string
+      disallowed_deps:
+        type: string
+      disallowed_licenses:
+        type: string
+      name:
+        type: string
+      organisation_id:
+        type: integer
+    required:
+    - name
+    - organisation_id
+    type: object
+  handlers.CreateProductInput:
+    properties:
+      name:
+        type: string
+      organisation_id:
+        type: integer
+    required:
+    - name
+    - organisation_id
+    type: object
+  handlers.CreateRepositoryInput:
+    properties:
+      name:
+        type: string
+      product_id:
+        type: integer
+      repo_url:
+        type: string
+    required:
+    - name
+    - product_id
+    - repo_url
+    type: object
+  handlers.DashboardStats:
+    properties:
+      compliance:
+        description: allowed, denied, unknown
+        items:
+          $ref: '#/definitions/handlers.DataPoint'
+        type: array
+      ecosystems:
+        items:
+          $ref: '#/definitions/handlers.DataPoint'
+        type: array
+      licenses:
+        items:
+          $ref: '#/definitions/handlers.DataPoint'
+        type: array
+      total_dependencies:
+        type: integer
+      vulnerabilities:
+        items:
+          $ref: '#/definitions/handlers.DataPoint'
+        type: array
+    type: object
+  handlers.DataPoint:
+    properties:
+      name:
+        type: string
+      value:
+        type: integer
+    type: object
+  handlers.LicenseCountResponse:
+    properties:
+      count:
+        type: integer
+      name:
+        type: string
+    type: object
+  handlers.LicenseUsageResponse:
+    properties:
+      component_name:
+        type: string
+      product_name:
+        type: string
+      repository_name:
+        type: string
+      version:
+        type: string
+    type: object
+  handlers.PolicyBreach:
+    properties:
+      component_name:
+        type: string
+      license:
+        type: string
+      product_name:
+        type: string
+      reason:
+        type: string
+      repository_name:
+        type: string
+    type: object
+  handlers.PolicyDetailsResponse:
+    properties:
+      breaches:
+        items:
+          $ref: '#/definitions/handlers.PolicyBreach'
+        type: array
+      compliance_percent:
+        type: number
+      denied_components:
+        type: integer
+      policy: {}
+      products: {}
+      total_components:
+        type: integer
+    type: object
+  handlers.UpdateProductPolicyInput:
+    properties:
+      policy_id:
+        type: integer
+    type: object
+  models.Component:
+    properties:
+      compliance_reason:
+        type: string
+      compliance_status:
+        description: allowed, denied, unknown
+        type: string
+      id:
+        type: integer
+      license:
+        type: string
+      name:
+        type: string
+      purl:
+        type: string
+      sbom_id:
+        type: integer
+      type:
+        type: string
+      version:
+        type: string
+      vulnerabilities:
+        items:
+          $ref: '#/definitions/models.Vulnerability'
+        type: array
+    type: object
+  models.Organisation:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      policies:
+        items:
+          $ref: '#/definitions/models.Policy'
+        type: array
+      products:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.Policy:
+    properties:
+      allowed_licenses:
+        description: Comma-separated
+        type: string
+      created_at:
+        type: string
+      disallowed_deps:
+        description: Comma-separated (partial name match)
+        type: string
+      disallowed_licenses:
+        description: Comma-separated
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      organisation_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      organisation_id:
+        type: integer
+      policy:
+        $ref: '#/definitions/models.Policy'
+      policy_id:
+        type: integer
+      repositories:
+        items:
+          $ref: '#/definitions/models.Repository'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.Repository:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      last_scan:
+        type: string
+      name:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: integer
+      repo_url:
+        type: string
+      sboms:
+        items:
+          $ref: '#/definitions/models.SBOM'
+        type: array
+      status:
+        description: pending, scanning, completed, failed
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.SBOM:
+    properties:
+      components:
+        items:
+          $ref: '#/definitions/models.Component'
+        type: array
+      created_at:
+        type: string
+      file_name:
+        type: string
+      format:
+        description: CycloneDX, SPDX, Syft
+        type: string
+      id:
+        type: integer
+      repository_id:
+        type: integer
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  models.Vulnerability:
+    properties:
+      created_at:
+        type: string
+      cvss:
+        type: string
+      details:
+        type: string
+      id:
+        type: integer
+      osv_id:
+        type: string
+      severity:
+        description: CRITICAL, HIGH, MEDIUM, LOW
+        type: string
+      summary:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the Scapegoat SBOM and Vulnerability Management API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Scapegoat API
+  version: "1.0"
+paths:
+  /dashboard/stats:
+    get:
+      description: Get aggregated stats including total dependencies, license distribution,
+        ecosystem distribution, compliance status, and vulnerability severity counts.
+      parameters:
+      - description: Organisation ID to filter by
+        in: query
+        name: organisation_id
+        type: integer
+      - description: Product ID to filter by
+        in: query
+        name: product_id
+        type: integer
+      - description: Repository ID to filter by
+        in: query
+        name: repository_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DashboardStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get dashboard statistics
+      tags:
+      - dashboard
+  /licenses:
+    get:
+      description: Get a list of all unique licenses found in the latest SBOMs, with
+        counts.
+      parameters:
+      - description: Organisation ID to filter by
+        in: query
+        name: organisation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.LicenseCountResponse'
+            type: array
+      summary: List all licenses
+      tags:
+      - compliance
+  /licenses/{name}:
+    get:
+      description: Get a list of components across all repositories that use a specific
+        license.
+      parameters:
+      - description: License Name (use 'Unknown' for empty licenses)
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Organisation ID to filter by
+        in: query
+        name: organisation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.LicenseUsageResponse'
+            type: array
+      summary: Get license details
+      tags:
+      - compliance
+  /organisations:
+    get:
+      description: Get a list of all organisations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Organisation'
+            type: array
+      summary: List organisations
+      tags:
+      - organisations
+    post:
+      consumes:
+      - application/json
+      description: Create a new organisation with the given name
+      parameters:
+      - description: Organisation object
+        in: body
+        name: organisation
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateOrganisationInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Organisation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new organisation
+      tags:
+      - organisations
+  /organisations/{id}:
+    delete:
+      description: Delete an organisation by ID
+      parameters:
+      - description: Organisation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an organisation
+      tags:
+      - organisations
+    put:
+      consumes:
+      - application/json
+      description: Update the name of an existing organisation
+      parameters:
+      - description: Organisation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Organisation object
+        in: body
+        name: organisation
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateOrganisationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Organisation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an organisation
+      tags:
+      - organisations
+  /policies:
+    get:
+      description: Get a list of policies, optionally filtered by organisation
+      parameters:
+      - description: Organisation ID to filter by
+        in: query
+        name: organisation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Policy'
+            type: array
+      summary: List policies
+      tags:
+      - policies
+    post:
+      consumes:
+      - application/json
+      description: Create a new compliance policy for an organisation
+      parameters:
+      - description: Policy object
+        in: body
+        name: policy
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreatePolicyInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Policy'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new policy
+      tags:
+      - policies
+  /policies/{id}:
+    get:
+      description: Get detailed information about a policy, including products using
+        it, compliance percentage, and a list of components breaching the policy.
+      parameters:
+      - description: Policy ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PolicyDetailsResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get policy details
+      tags:
+      - policies
+  /products:
+    get:
+      description: Get a list of products, optionally filtered by organisation
+      parameters:
+      - description: Organisation ID to filter by
+        in: query
+        name: organisation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+      summary: List products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product under an organisation
+      parameters:
+      - description: Product object
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateProductInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new product
+      tags:
+      - products
+  /products/{id}/policy:
+    put:
+      consumes:
+      - application/json
+      description: Assign or update a compliance policy for a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Policy ID wrapper
+        in: body
+        name: policy
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateProductPolicyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update product policy
+      tags:
+      - products
+  /repositories:
+    get:
+      description: Get a list of repositories, optionally filtered by product or organisation
+      parameters:
+      - description: Product ID to filter by
+        in: query
+        name: product_id
+        type: integer
+      - description: Organisation ID to filter by
+        in: query
+        name: organisation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Repository'
+            type: array
+      summary: List repositories
+      tags:
+      - repositories
+    post:
+      consumes:
+      - application/json
+      description: Create a new repository under a product
+      parameters:
+      - description: Repository object
+        in: body
+        name: repository
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateRepositoryInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Repository'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new repository
+      tags:
+      - repositories
+  /repositories/{id}:
+    get:
+      description: Get a repository by ID
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Repository'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a repository
+      tags:
+      - repositories
+  /repositories/{id}/sbom:
+    get:
+      description: Get the most recent SBOM (with components and vulnerabilities)
+        for a repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SBOM'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get repository SBOM
+      tags:
+      - repositories
+  /repositories/{id}/scan:
+    post:
+      description: Trigger a new SBOM scan for the given repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "222":
+          description: ""
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Trigger a repository scan
+      tags:
+      - repositories
+  /repositories/{id}/scans:
+    get:
+      description: Get a history of SBOM scans for a repository
+      parameters:
+      - description: Repository ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SBOM'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List repository scans
+      tags:
+      - repositories
+  /sboms/{id}:
+    get:
+      description: Get an SBOM by ID, including its components and vulnerabilities
+      parameters:
+      - description: SBOM ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SBOM'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get an SBOM
+      tags:
+      - sboms
+  /sboms/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an SBOM file (CycloneDX, SPDX, or Syft) and parse its contents.
+        Optionally associate it with a repository.
+      parameters:
+      - description: SBOM file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Repository ID to associate the SBOM with
+        in: formData
+        name: repository_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SBOM'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upload an SBOM
+      tags:
+      - sboms
+swagger: "2.0"

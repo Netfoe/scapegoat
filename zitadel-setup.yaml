@@ -1,0 +1,35 @@
+FirstInstance:
+  Admins:
+    - UserName: 'admin'
+      FirstName: 'Zitadel'
+      LastName: 'Admin'
+      Email:
+        Address: 'admin@example.com'
+        Verified: true
+      Password: 'Password1!'
+  Features:
+    LoginV2:
+      Required: true
+      BaseURI: 'http://localhost:8080/ui/v2/login'
+    ConsoleUseV2UserApi: true
+  Org:
+    Name: 'Scapegoat'
+    Human:
+      UserName: 'admin'
+      FirstName: 'Zitadel'
+      LastName: 'Admin'
+      Email:
+        Address: 'admin@example.com'
+        Verified: true
+      Password: 'Password1!'
+      PasswordChangeRequired: false
+    Machine:
+      Machine:
+        Username: 'setup-bot'
+        Name: 'Setup Bot'
+      Roles:
+        - IAM_OWNER
+      Pat:
+        Description: 'Setup Bot Token'
+        ExpirationDate: '2030-01-01T00:00:00Z'
+  PatPath: '/shared/setup-token.txt'
