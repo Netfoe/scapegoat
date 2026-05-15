@@ -138,3 +138,57 @@ func GetDashboardStats(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, stats)
 	}
 }
+
+// GetDashboardVulnerabilities returns a list of vulnerabilities for the dashboard
+// @Summary Get dashboard vulnerabilities
+// @Description Get a detailed list of vulnerabilities including component and repository info, filtered by org, product, or repo.
+// @Tags dashboard
+// @Produce json
+// @Param organisation_id query int false "Organisation ID to filter by"
+// @Param product_id query int false "Product ID to filter by"
+// @Param repository_id query int false "Repository ID to filter by"
+// @Success 200 {array} VulnerabilityDashboardResponse
+// @Failure 500 {object} map[string]string
+// @Router /dashboard/vulnerabilities [get]
+func GetDashboardVulnerabilities(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		orgID := c.Query("organisation_id")
+		productID := c.Query("product_id")
+		repoID := c.Query("repository_id")
+
+		subQuery := db.Table("sboms").
+			Select("DISTINCT ON (sboms.repository_id) sboms.id").
+			Order("sboms.repository_id, sboms.created_at DESC")
+
+		if repoID != "" {
+			subQuery = subQuery.Where("sboms.repository_id = ?", repoID)
+		} else if productID != "" {
+			subQuery = subQuery.Joins("JOIN repositories ON repositories.id = sboms.repository_id").
+				Where("repositories.product_id = ?", productID)
+		} else if orgID != "" {
+			subQuery = subQuery.Joins("JOIN repositories ON repositories.id = sboms.repository_id").
+				Joins("JOIN products ON products.id = repositories.product_id").
+				Where("products.organisation_id = ?", orgID)
+		}
+
+		var vulnerabilities []VulnerabilityDashboardResponse
+
+		err := db.Table("vulnerabilities").
+			Select("vulnerabilities.osv_id, vulnerabilities.severity, vulnerabilities.summary, components.name as component_name, components.version as component_version, repositories.name as repository_name, products.name as product_name").
+			Joins("JOIN component_vulnerabilities ON component_vulnerabilities.vulnerability_id = vulnerabilities.id").
+			Joins("JOIN components ON components.id = component_vulnerabilities.component_id").
+			Joins("JOIN sboms ON sboms.id = components.sbom_id").
+			Joins("JOIN repositories ON repositories.id = sboms.repository_id").
+			Joins("JOIN products ON products.id = repositories.product_id").
+			Where("sboms.id IN (?)", subQuery).
+			Order("CASE vulnerabilities.severity WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 WHEN 'LOW' THEN 4 ELSE 5 END, vulnerabilities.osv_id DESC").
+			Scan(&vulnerabilities).Error
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch vulnerabilities"})
+			return
+		}
+
+		c.JSON(http.StatusOK, vulnerabilities)
+	}
+}

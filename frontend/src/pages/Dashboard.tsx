@@ -54,6 +54,11 @@ const Dashboard: FC = () => {
     queryFn: () => api.fetchDashboardStats(selectedOrg, selectedApplication, selectedRepo)
   });
 
+  const { data: vulnerabilities } = useQuery({
+    queryKey: ['dashboardVulnerabilities', selectedOrg, selectedApplication, selectedRepo],
+    queryFn: () => api.fetchDashboardVulnerabilities(selectedOrg, selectedApplication, selectedRepo)
+  });
+
   if (isLoading) {
     return (
       <div className="loader-container">
@@ -313,6 +318,57 @@ const Dashboard: FC = () => {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header"><h3 className="card-title">Vulnerabilities</h3></div>
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Severity</th>
+                    <th>ID</th>
+                    <th>Summary</th>
+                    <th>Component</th>
+                    <th>Application / Repo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(vulnerabilities || []).length > 0 ? (
+                    vulnerabilities?.map((v, index) => (
+                      <tr key={index}>
+                        <td>
+                          <span className={`badge ${
+                            v.severity === 'CRITICAL' ? 'bg-danger text-white' :
+                            v.severity === 'HIGH' ? 'bg-orange-600 text-white' :
+                            v.severity === 'MEDIUM' ? 'bg-warning text-black' :
+                            v.severity === 'LOW' ? 'bg-success text-white' : 'bg-gray-500 text-white'
+                          } px-2 py-1 rounded text-xs font-bold`}>
+                            {v.severity}
+                          </span>
+                        </td>
+                        <td className="font-mono text-sm">{v.osv_id}</td>
+                        <td className="max-w-md truncate" title={v.summary}>{v.summary}</td>
+                        <td>
+                          <div className="font-semibold">{v.component_name}</div>
+                          <div className="text-xs text-muted">{v.component_version}</div>
+                        </td>
+                        <td>
+                          <div className="font-semibold">{v.product_name}</div>
+                          <div className="text-xs text-muted">{v.repository_name}</div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="text-center py-8 text-muted">
+                        No vulnerabilities found in the current scope.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

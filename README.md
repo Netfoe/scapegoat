@@ -1,4 +1,22 @@
-# Scapegoat Project Structure
+<center>
+<img src="docs/scapegoat-logo-small.png" alt="Scapegoat" />
+</center>
+
+# Scapegoat
+
+Scapegoat is an open-source Software Composition Analysis (SCA) platform designed to simplify Software Bill of Materials (SBOM) management and supply chain security. It provides a centralized dashboard for organizations to track dependencies, identify vulnerabilities, and enforce compliance policies across their software portfolio.
+
+## Key Features
+
+- **Comprehensive SBOM Support:** Import and analyze SBOMs in CycloneDX, SPDX, and Syft JSON formats.
+- **Automated Vulnerability Scanning:** Integration with industry-standard scanners like Grype and OSV to identify known vulnerabilities (CVEs) in your dependencies.
+- **Flexible Policy Engine:** Define and enforce custom security and compliance policies to ensure software meets your organization's standards.
+- **GitHub Integration:** Seamlessly import repositories and manage SBOMs directly from your GitHub organizations.
+- **License & Compliance Management:** Track software licenses across your projects and ensure legal compliance with built-in reporting.
+- **Advanced Dependency Search:** Quickly locate specific packages and versions across your entire application hierarchy.
+- **Interactive Dashboards:** Gain real-time insights into your security posture with intuitive visualizations and health metrics.
+
+## Project Structure
 
 This project is divided into two main parts:
 - `backend/`: A Go-based API for scanning and analyzing SBOMs.

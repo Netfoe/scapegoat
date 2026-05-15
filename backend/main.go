@@ -126,6 +126,7 @@ func main() {
 
 	// Dashboard Routes
 	v1.GET("/dashboard/stats", handlers.GetDashboardStats(db))
+	v1.GET("/dashboard/vulnerabilities", handlers.GetDashboardVulnerabilities(db))
 
 	// Search Routes
 	v1.GET("/search/dependencies", handlers.SearchDependencies(db))

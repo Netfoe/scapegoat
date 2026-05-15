@@ -39,3 +39,13 @@ type DependencyUsageResponse struct {
 	Version          string `json:"version"`
 	PURL             string `json:"purl"`
 }
+
+type VulnerabilityDashboardResponse struct {
+	OSVID            string `json:"osv_id"`
+	Severity         string `json:"severity"`
+	Summary          string `json:"summary"`
+	ComponentName    string `json:"component_name"`
+	ComponentVersion string `json:"component_version"`
+	RepositoryName   string `json:"repository_name"`
+	ProductName      string `json:"product_name"`
+}

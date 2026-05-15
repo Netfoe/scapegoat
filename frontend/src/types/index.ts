@@ -109,3 +109,13 @@ export interface DependencyUsage {
   version: string;
   purl: string;
 }
+
+export interface VulnerabilityDashboard {
+  osv_id: string;
+  severity: string;
+  summary: string;
+  component_name: string;
+  component_version: string;
+  repository_name: string;
+  product_name: string;
+}

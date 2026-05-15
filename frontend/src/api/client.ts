@@ -1,4 +1,4 @@
-import type { Organisation, Product, Repository, SBOM, Policy, PolicyDetails, LicenseUsage, DependencyUsage } from '../types';
+import type { Organisation, Product, Repository, SBOM, Policy, PolicyDetails, LicenseUsage, DependencyUsage, VulnerabilityDashboard } from '../types';
 import { zitadel } from '../auth';
 
 const getEnv = (key: string, defaultValue: string): string => {
@@ -261,6 +261,19 @@ export const api = {
       headers: await getHeaders(),
     });
     if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+    return res.json();
+  },
+
+  fetchDashboardVulnerabilities: async (orgId?: number, productId?: number, repoId?: number): Promise<VulnerabilityDashboard[]> => {
+    const params = new URLSearchParams();
+    if (orgId) params.append('organisation_id', orgId.toString());
+    if (productId) params.append('product_id', productId.toString());
+    if (repoId) params.append('repository_id', repoId.toString());
+    
+    const res = await fetch(`${API_URL}/api/v1/dashboard/vulnerabilities?${params.toString()}`, {
+      headers: await getHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch dashboard vulnerabilities');
     return res.json();
   },
 
