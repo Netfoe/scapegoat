@@ -94,6 +94,10 @@ export function getRepositoryUrl(purl: string): string | null {
       return `https://pkgs.alpinelinux.org/packages?name=${name}`;
     case 'rpm':
       return `https://pkgs.org/search/?q=${name}`;
+    case 'github':
+      return namespace
+        ? `https://github.com/${namespace}/${name}`
+        : `https://github.com/${name}`;
     default:
       return null;
   }
