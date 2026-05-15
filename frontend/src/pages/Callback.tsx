@@ -14,7 +14,7 @@ export const Callback = () => {
       })
       .catch((err) => {
         console.error("Login failed", err);
-        navigate("/login");
+        navigate("/login", { state: { error: err.message || "Authentication failed. Please try again." } });
       });
   }, [navigate]);
 

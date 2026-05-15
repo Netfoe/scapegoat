@@ -11,21 +11,30 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/netfoe/scapegoat/backend/internal/models"
-	"github.com/netfoe/scapegoat/backend/internal/parser"
 	"github.com/netfoe/scapegoat/backend/internal/policy"
 	"github.com/netfoe/scapegoat/backend/internal/queue"
-	"github.com/netfoe/scapegoat/backend/internal/vulnerability"
+	"github.com/netfoe/scapegoat/backend/internal/scanner"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type Worker struct {
-	db    *gorm.DB
-	queue *queue.Client
+	db             *gorm.DB
+	queue          *queue.Client
+	sbomScanner    scanner.SBOMScanner
+	vulnScanners   []scanner.VulnerabilityScanner
 }
 
 func NewWorker(db *gorm.DB, q *queue.Client) *Worker {
-	return &Worker{db: db, queue: q}
+	return &Worker{
+		db:    db,
+		queue: q,
+		sbomScanner: &scanner.SyftScanner{},
+		vulnScanners: []scanner.VulnerabilityScanner{
+			&scanner.OSVScanner{},
+			&scanner.GrypeScanner{},
+		},
+	}
 }
 
 func (w *Worker) Start(ctx context.Context) {
@@ -97,41 +106,41 @@ func (w *Worker) processJob(ctx context.Context, job *queue.ScanJob) {
 		return
 	}
 
-	// 3. Generate SBOM using Syft
-	sbomPath := filepath.Join(tmpDir, "sbom.json")
-	cmd = exec.Command("syft", "scan", "dir:"+tmpDir, "-o", "json", "--file", sbomPath)
-	if err := cmd.Run(); err != nil {
-		w.failJob(job.RepositoryID, fmt.Errorf("failed to run syft: %v", err))
-		return
-	}
-
-	// 4. Parse and Save
-	f, err := os.Open(sbomPath)
+	// 3. Generate SBOM using Scanner
+	log.Printf("Generating SBOM using %s scanner", w.sbomScanner.Name())
+	sbom, err := w.sbomScanner.Scan(ctx, tmpDir)
 	if err != nil {
-		w.failJob(job.RepositoryID, fmt.Errorf("failed to open generated sbom: %v", err))
-		return
-	}
-	defer f.Close()
-
-	sbom, err := parser.DetectAndParse(f, "syft-generated.json")
-	if err != nil {
-		w.failJob(job.RepositoryID, fmt.Errorf("failed to parse generated sbom: %v", err))
+		w.failJob(job.RepositoryID, fmt.Errorf("failed to generate sbom: %v", err))
 		return
 	}
 
 	sbom.RepositoryID = &job.RepositoryID
 	now := time.Now()
 
-	// 5. Fetch Vulnerabilities
-	log.Printf("Fetching vulnerabilities for %d components", len(sbom.Components))
-	vulnMap, err := vulnerability.FetchVulnerabilities(sbom.Components)
-	if err != nil {
-		log.Printf("Warning: failed to fetch vulnerabilities: %v", err)
-	} else {
+	// 4. Identify Vulnerabilities using all configured scanners
+	for _, s := range w.vulnScanners {
+		log.Printf("Identifying vulnerabilities using %s scanner", s.Name())
+		vulnMap, err := s.IdentifyVulnerabilities(ctx, sbom, tmpDir)
+		if err != nil {
+			log.Printf("Warning: failed to fetch vulnerabilities from %s: %v", s.Name(), err)
+			continue
+		}
+
 		// Map PURL to vulnerabilities
 		for i := range sbom.Components {
 			if vulns, ok := vulnMap[sbom.Components[i].PURL]; ok {
-				sbom.Components[i].Vulnerabilities = vulns
+				// Avoid duplicates if multiple scanners find the same vuln
+				existingIDs := make(map[string]bool)
+				for _, v := range sbom.Components[i].Vulnerabilities {
+					existingIDs[v.OSVID] = true
+				}
+
+				for _, v := range vulns {
+					if !existingIDs[v.OSVID] {
+						sbom.Components[i].Vulnerabilities = append(sbom.Components[i].Vulnerabilities, v)
+						existingIDs[v.OSVID] = true
+					}
+				}
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { User } from 'oidc-client-ts';
 import { OrganisationProvider } from './context/OrganisationContext';
 import { zitadel } from './auth';
 import Layout from './components/Layout';
@@ -26,9 +27,27 @@ function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    zitadel.userManager.getUser().then((user) => {
+    const handleUser = (user: User | null) => {
       setAuthenticated(!!user && !user.expired);
-    });
+    };
+
+    // Initial check
+    zitadel.userManager.getUser().then(handleUser);
+
+    // Subscribe to events
+    const onUserLoaded = (user: User) => handleUser(user);
+    const onUserUnloaded = () => handleUser(null);
+    const onTokenExpired = () => handleUser(null);
+
+    zitadel.userManager.events.addUserLoaded(onUserLoaded);
+    zitadel.userManager.events.addUserUnloaded(onUserUnloaded);
+    zitadel.userManager.events.addAccessTokenExpired(onTokenExpired);
+
+    return () => {
+      zitadel.userManager.events.removeUserLoaded(onUserLoaded);
+      zitadel.userManager.events.removeUserUnloaded(onUserUnloaded);
+      zitadel.userManager.events.removeAccessTokenExpired(onTokenExpired);
+    };
   }, []);
 
   if (authenticated === null) {

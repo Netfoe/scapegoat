@@ -16,9 +16,24 @@ export default function Layout() {
   });
 
   useEffect(() => {
-    zitadel.userManager.getUser().then((user) => {
+    const handleUser = (user: User | null) => {
       setUser(user);
-    });
+    };
+
+    // Initial check
+    zitadel.userManager.getUser().then(handleUser);
+
+    // Subscribe to events
+    const onUserLoaded = (user: User) => handleUser(user);
+    const onUserUnloaded = () => handleUser(null);
+
+    zitadel.userManager.events.addUserLoaded(onUserLoaded);
+    zitadel.userManager.events.addUserUnloaded(onUserUnloaded);
+
+    return () => {
+      zitadel.userManager.events.removeUserLoaded(onUserLoaded);
+      zitadel.userManager.events.removeUserUnloaded(onUserUnloaded);
+    };
   }, []);
 
   useEffect(() => {
