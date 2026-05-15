@@ -16,13 +16,19 @@ This project is divided into two main parts:
 
 ### Running the application
 1. Clone the repository.
-2. Run the following command in the root directory:
+2. Initialize the environment:
+   ```bash
+   chmod +x scripts/init.sh
+   ./scripts/init.sh
+   ```
+   *Note: This script creates the necessary files in the `shared/` directory. A `.env.example` is provided in the root for reference.*
+3. Run the following command in the root directory:
    ```bash
    docker compose up --build
    ```
-3. The frontend will be available at `http://localhost:5173`.
-4. ZITADEL will be available at `http://localhost:8080`.
-5. The backend API will be available at `http://localhost:8081`.
+4. The frontend will be available at `http://localhost:5173`.
+5. ZITADEL will be available at `http://localhost:8080`.
+6. The backend API will be available at `http://localhost:8081`.
 
 ### Manual Testing
 You can test the SBOM upload by uploading any valid CycloneDX, SPDX (JSON), or Syft JSON file through the UI.
