@@ -342,11 +342,11 @@ const Dashboard: FC = () => {
                       <tr key={index}>
                         <td>
                           <span className={`badge ${
-                            v.severity === 'CRITICAL' ? 'bg-danger text-white' :
-                            v.severity === 'HIGH' ? 'bg-orange-600 text-white' :
-                            v.severity === 'MEDIUM' ? 'bg-warning text-black' :
-                            v.severity === 'LOW' ? 'bg-success text-white' : 'bg-gray-500 text-white'
-                          } px-2 py-1 rounded text-xs font-bold`}>
+                            v.severity === 'CRITICAL' ? 'badge-danger' :
+                            v.severity === 'HIGH' ? 'badge-danger' :
+                            v.severity === 'MEDIUM' ? 'badge-warning' :
+                            v.severity === 'LOW' ? 'badge-success' : 'badge-default'
+                          }`}>
                             {v.severity}
                           </span>
                         </td>

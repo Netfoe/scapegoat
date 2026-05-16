@@ -108,15 +108,15 @@ func GetDashboardStats(db *gorm.DB) gin.HandlerFunc {
 			Order("CASE severity WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 WHEN 'LOW' THEN 4 ELSE 5 END").
 			Scan(&stats.Vulnerabilities)
 
-		// Ecosystems (derived from P_URL)
+		// Ecosystems (derived from PURL)
 		var rawEcosystems []struct {
-			PURL  string `gorm:"column:p_url"`
+			PURL  string `gorm:"column:purl"`
 			Count int
 		}
 		db.Table("components").
-			Select("p_url, count(*) as count").
+			Select("purl, count(*) as count").
 			Where("sbom_id IN ?", sbomIDs).
-			Group("p_url").
+			Group("purl").
 			Scan(&rawEcosystems)
 
 		ecosystemMap := make(map[string]int)

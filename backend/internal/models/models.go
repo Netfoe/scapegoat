@@ -75,7 +75,7 @@ type Component struct {
 	Name             string          `json:"name"`
 	Version          string          `json:"version"`
 	License          string          `json:"license"`
-	PURL             string          `json:"purl"`
+	PURL             string          `json:"purl" gorm:"column:purl"`
 	Type             string          `json:"type"`
 	ComplianceStatus string          `json:"compliance_status"` // allowed, denied, unknown
 	ComplianceReason string          `json:"compliance_reason"`

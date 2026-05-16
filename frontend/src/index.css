@@ -114,6 +114,9 @@ h1, h2, h3, h4, h5, h6 {
 .text-right { text-align: right; }
 .text-danger { color: var(--danger); }
 .text-success { color: var(--success); }
+.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.max-w-md { max-width: 28rem; }
 
 /* Layout & Containers */
 .app-container {
@@ -408,6 +411,10 @@ h1, h2, h3, h4, h5, h6 {
 .badge-success {
   background-color: var(--success-bg);
   color: var(--success);
+}
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 .badge-danger {
   background-color: var(--danger-bg);
